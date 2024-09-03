@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Card,
     CardContent,
@@ -23,11 +23,15 @@ import "../authStyle.css";
 import { CiUser } from 'react-icons/ci';
 import { TbLockOpen } from 'react-icons/tb';
 import { FaEye } from 'react-icons/fa';
+import { signIn } from '@/utils/endPoint';
+import { useRouter } from 'next/navigation';
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const formSchema = z.object({
-    username: z
+    email: z
         .string()
-        .min(1, { message: "This field has to be filled." }),
+        .email(),
     password: z.string()
         .min(8, { message: "Password must be at least 8 characters long" }) // Minimum length
         .max(20, { message: "Password must be no more than 20 characters long" }) // Maximum length
@@ -41,19 +45,34 @@ const formSchema = z.object({
 const SignIn = () => {
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!!localStorage.getItem("token")) {
+          router.push("/");
+        } else {
+          localStorage.clear();
+        }
+      }, []);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            username: "",
+            email: "",
             password: "",
         },
     })
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
-        console.log(values)
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const response = await signIn(values);
+        
+        if(response.success) {
+            localStorage.setItem("token", response.data.access_token);
+            router.push("/")
+            toast.success(response.message);
+        } else {
+            toast.warn(response?.response?.data?.message);
+        }
     }
 
     const togglePasswordVisibility = () => {
@@ -61,21 +80,18 @@ const SignIn = () => {
       };
     return (
         <div className='card-component'>
+            <ToastContainer/>
             <Card className='auth-form'>
-                {/* <CardHeader>
-                    <CardTitle>Sign In</CardTitle>
-                    <CardDescription>Sign-in to get students details.</CardDescription>
-                </CardHeader> */}
                 <CardContent>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex flex-col justify-between items-center">
                             <div className='input-fields'>
                                 <FormField
                                     control={form.control}
-                                    name="username"
+                                    name="email"
                                     render={({ field }) => (
                                         <FormItem className="field">
-                                            <FormLabel>Username</FormLabel>
+                                            <FormLabel>Email</FormLabel>
                                             <FormControl> 
                                                 <Input placeholder="username" {...field} leftIcon={<CiUser className='mr-[10px]'/>}/>
                                             </FormControl>
