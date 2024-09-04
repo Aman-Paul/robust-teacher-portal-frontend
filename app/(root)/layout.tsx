@@ -7,10 +7,8 @@ const HomeLayout = ({ children }: { children: ReactNode }) => {
         <main className='relative'>
             <ProtectedRoute>
                 <Navbar/>
-                <div>
-                    <div>
-                        {children}
-                    </div>
+                <div className="flex justify-center">
+                    {children}
                 </div>
             </ProtectedRoute>
         </main>

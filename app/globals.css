@@ -87,3 +87,27 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+.actions {
+  width: 100%;
+}
+
+.actions li {
+  padding: 5px 10px;
+  border: 1px solid transparent;
+  border-bottom-color: rgb(194, 194, 194);
+  cursor: pointer;
+}
+
+.actions li:hover {
+  background-color: rgb(194, 194, 194);
+}
+
+
+.flex-col-start {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
