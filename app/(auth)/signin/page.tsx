@@ -27,6 +27,9 @@ import { signIn } from '@/utils/endPoint';
 import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { RootState, useAppSelector } from '@/redux/store';
+import { useDispatch } from 'react-redux';
+import { logIn } from '@/redux/slice/auth-slice';
 
 const formSchema = z.object({
     email: z
@@ -45,13 +48,14 @@ const formSchema = z.object({
 const SignIn = () => {
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
+
+    const auth = useAppSelector((state: RootState) => state.auth.value);
     const router = useRouter();
+    const dispatch = useDispatch();
 
     useEffect(() => {
-        if (!!localStorage.getItem("token")) {
+        if (auth.token) {
           router.push("/");
-        } else {
-          localStorage.clear();
         }
       }, []);
 
@@ -67,7 +71,8 @@ const SignIn = () => {
         const response = await signIn(values);
         
         if(response.success) {
-            localStorage.setItem("token", response.data.access_token);
+            // localStorage.setItem("token", response.data.access_token);
+            dispatch(logIn({ token: response.data.access_token}));
             router.push("/")
             toast.success(response.message);
         } else {

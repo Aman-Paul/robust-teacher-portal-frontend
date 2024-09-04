@@ -1,26 +1,20 @@
 "use client";
+import { RootState, useAppSelector } from '@/redux/store';
 import { useRouter } from 'next/navigation'
 import { ReactNode, useEffect } from 'react';
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 
   const router = useRouter();
-  let user = undefined
-  let nextAcion = undefined
-  if (typeof window !== 'undefined'){
-     user = localStorage.getItem('token');
-  }
+  const auth = useAppSelector((state: RootState) => state.auth.value);
 
   useEffect(() => {
-    if (!user) {
+    if (!auth.token || !auth.token.length) {
       router.push('/signin');
       }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, router]);
+  }, [ auth, router]);
 
-  if (!user) {
-    return null; 
-  }
 
   return <>{children}</>;
 };
